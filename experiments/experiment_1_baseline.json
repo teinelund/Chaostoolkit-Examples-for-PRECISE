@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "title": "Baseline: Frontend and Backend healthy",
+  "description": "Verify both services work correctly under normal conditions",
+  "tags": ["baseline", "health-check"],
+  "steady-state-hypothesis": {
+    "title": "Both services are healthy and responding",
+    "probes": [
+      {
+        "type": "probe",
+        "name": "backend-is-healthy",
+        "tolerance": 200,
+        "provider": {
+          "type": "http",
+          "url": "http://127.0.0.1:5001/health",
+          "timeout": 3
+        }
+      },
+      {
+        "type": "probe",
+        "name": "frontend-is-healthy",
+        "tolerance": 200,
+        "provider": {
+          "type": "http",
+          "url": "http://127.0.0.1:5000/health",
+          "timeout": 3
+        }
+      },
+      {
+        "type": "probe",
+        "name": "frontend-can-display-products",
+        "tolerance": 200,
+        "provider": {
+          "type": "http",
+          "url": "http://127.0.0.1:5000/",
+          "timeout": 3
+        }
+      }
+    ]
+  },
+  "method": []
+}

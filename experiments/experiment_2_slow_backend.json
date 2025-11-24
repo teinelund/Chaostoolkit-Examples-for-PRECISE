@@ -1,0 +1,61 @@
+{
+  "version": "1.0.0",
+  "title": "Chaos: Test Frontend resilience with slow Backend",
+  "description": "Manually start Backend with BACKEND_DELAY=2, then run this experiment to test Frontend behavior",
+  "tags": ["latency", "timeout", "resilience"],
+  "configuration": {
+    "frontend_url": "http://127.0.0.1:5000",
+    "backend_url": "http://127.0.0.1:5001"
+  },
+  "steady-state-hypothesis": {
+    "title": "Frontend remains accessible and provides content to users",
+    "probes": [
+      {
+        "type": "probe",
+        "name": "frontend-is-accessible",
+        "tolerance": 200,
+        "provider": {
+          "type": "http",
+          "url": "${frontend_url}/",
+          "timeout": 5
+        }
+      }
+    ]
+  },
+  "method": [
+    {
+      "type": "probe",
+      "name": "check-frontend-response",
+      "tolerance": 200,
+      "provider": {
+        "type": "http",
+        "url": "${frontend_url}/",
+        "timeout": 5
+      }
+    },
+    {
+      "type": "probe",
+      "name": "verify-frontend-still-serves-users",
+      "tolerance": 200,
+      "provider": {
+        "type": "http",
+        "url": "${frontend_url}/",
+        "timeout": 5
+      },
+      "pauses": {
+        "after": 1
+      }
+    },
+    {
+      "type": "probe",
+      "name": "check-circuit-breaker-state",
+      "tolerance": 200,
+      "provider": {
+        "type": "http",
+        "url": "${frontend_url}/circuit-breaker/status",
+        "timeout": 3
+      }
+    }
+  ],
+  "rollbacks": []
+}

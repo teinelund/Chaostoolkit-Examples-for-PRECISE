@@ -1,0 +1,59 @@
+{
+  "version": "1.0.0",
+  "title": "Chaos: Backend completely unavailable",
+  "description": "Backend service is killed. Tests if Frontend provides graceful degradation.",
+  "tags": ["service-failure", "resilience", "graceful-degradation"],
+  "steady-state-hypothesis": {
+    "title": "Frontend continues serving users despite Backend failure",
+    "probes": [
+      {
+        "type": "probe",
+        "name": "frontend-still-responds",
+        "tolerance": 200,
+        "provider": {
+          "type": "http",
+          "url": "http://127.0.0.1:5000/",
+          "timeout": 5
+        }
+      }
+    ]
+  },
+  "method": [
+    {
+      "type": "action",
+      "name": "kill-backend-service",
+      "provider": {
+        "type": "process",
+        "path": "kill",
+        "arguments": ["$(cat backend.pid)"]
+      },
+      "pauses": {
+        "after": 2
+      }
+    },
+    {
+      "type": "probe",
+      "name": "frontend-provides-fallback-content",
+      "tolerance": 200,
+      "provider": {
+        "type": "http",
+        "url": "http://127.0.0.1:5000/",
+        "timeout": 5
+      }
+    },
+    {
+      "type": "probe",
+      "name": "circuit-breaker-activated",
+      "tolerance": true,
+      "provider": {
+        "type": "python",
+        "module": "os.path",
+        "func": "exists",
+        "arguments": {
+          "path": "frontend.pid"
+        }
+      }
+    }
+  ],
+  "rollbacks": []
+}
